@@ -2,7 +2,7 @@
   <div class="d-flex justify-content-end my-3">
     <button
       type="button"
-      class="btn btn-secondary"
+      class="btn btn-primary"
       data-bs-toggle="modal"
       data-bs-target="#exampleModal"
     >
@@ -40,6 +40,7 @@
                 v-model="title"
                 required
               />
+              <span v-if="errors.title" class="text-danger">{{ errors.title }}</span>
             </div>
             <div class="mb-3">
               <label for="description" class="form-label">Description</label>
@@ -50,6 +51,7 @@
                 rows="3"
                 required
               ></textarea>
+              <span v-if="errors.description" class="text-danger">{{ errors.description }}</span>
             </div>
             <div class="mb-3">
               <label for="statusSelect" class="form-label">Status</label>
@@ -63,6 +65,7 @@
                 <option value="progress">In Progress</option>
                 <option value="done">Done</option>
               </select>
+              <span v-if="errors.status" class="text-danger">{{ errors.status }}</span>
             </div>
 
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -80,28 +83,47 @@ const title = ref("");
 const description = ref("");
 const status = ref("todo");
 
+const errors = ref({
+  title: "",
+  description: "",
+  status: ""
+});
+
 const emit = defineEmits(["add-task"]);
 
+const validateForm = () => {
+  errors.value.title = title.value.length >= 3 ? "" : "Title must be at least 3 characters.";
+  errors.value.description = description.value.length >= 10 ? "" : "Description must be at least 10 characters.";
+  errors.value.status = status.value ? "" : "Status is required.";
+
+  return !errors.value.title && !errors.value.description && !errors.value.status;
+};
+
 const submitForm = () => {
-  emit("add-task", {
-    title: title.value,
-    description: description.value,
-    status: status.value,
-  });
+  if (validateForm()) {
+    emit("add-task", {
+      title: title.value,
+      description: description.value,
+      status: status.value
+    });
 
-  title.value = "";
-  description.value = "";
-  status.value = "todo";
+    title.value = "";
+    description.value = "";
+    status.value = "todo";
 
-  const modal = new bootstrap.Modal(document.getElementById("exampleModal"));
-  modal.hide();
+    const modal = new bootstrap.Modal(document.getElementById("exampleModal"));
+    modal.hide();
 
-  location.reload();
+    location.reload();
+  }
 };
 </script>
 
 <style scoped>
 .d-flex {
   margin: 20px;
+}
+.text-danger {
+  font-size: 0.9rem;
 }
 </style>

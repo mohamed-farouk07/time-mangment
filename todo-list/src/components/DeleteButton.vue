@@ -7,14 +7,11 @@
   <script setup>
   import { ref } from 'vue';
   
-  // Selected category and task index to remove
-  const category = ref('todo'); // default category, can be 'progress' or 'done'
-  const index = ref(0); // default task index
+  const category = ref('todo');
+  const index = ref(0);
   
-  // Emit function to send data to the parent
   const emit = defineEmits(['delete-task']);
   
-  // Function to emit the delete event
   const handleDeleteTask = () => {
     emit('delete-task', category.value, index.value);
   };
