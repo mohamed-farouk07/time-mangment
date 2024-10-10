@@ -27,7 +27,7 @@ const addTask = (newTask) => {
 </script>
 
 <template>
-  <Header />
+  <Header :todoCount="tasks.todo.length" />
   <ModalForm @add-task="addTask" />
   <TaskBoard :tasks="tasks" />
 </template>

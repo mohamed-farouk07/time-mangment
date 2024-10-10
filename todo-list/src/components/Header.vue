@@ -3,15 +3,15 @@
     <h2>Task Management</h2>
     <div class="icon-container">
       <i class="bi bi-bell"></i>
-      <span class="dot"></span>
+      <span v-if="todoCount > 0" class="dot">{{ todoCount }}</span>
     </div>
   </header>
 </template>
 
-<script>
-export default {
-  name: "AppHeader",
-};
+<script setup>
+const props = defineProps({
+  todoCount: Number
+});
 </script>
 
 <style scoped>
@@ -41,9 +41,14 @@ export default {
   position: absolute;
   top: -15px;
   right: -10px;
-  height: 18px;
-  width: 18px;
+  height: 22px;
+  width: 22px;
   background-color: rgb(243, 121, 121);
   border-radius: 50%;
+  color: white;
+  font-size: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
