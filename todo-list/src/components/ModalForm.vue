@@ -76,22 +76,36 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref } from "vue";
 
-const title = ref("");
-const description = ref("");
-const status = ref("todo");
+declare const bootstrap: any;
 
-const errors = ref({
+interface Task {
+  title: string;
+  description: string;
+  status: string;
+}
+
+const title = ref<string>("");
+const description = ref<string>("");
+const status = ref<string>("todo");
+
+const errors = ref<{
+  title: string;
+  description: string;
+  status: string;
+}>({
   title: "",
   description: "",
   status: ""
 });
 
-const emit = defineEmits(["add-task"]);
+const emit = defineEmits<{
+  (event: "add-task", task: Task): void;
+}>();
 
-const validateForm = () => {
+const validateForm = (): boolean => {
   errors.value.title = title.value.length >= 3 ? "" : "Title must be at least 3 characters.";
   errors.value.description = description.value.length >= 10 ? "" : "Description must be at least 10 characters.";
   errors.value.status = status.value ? "" : "Status is required.";

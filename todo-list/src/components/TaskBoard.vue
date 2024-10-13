@@ -16,8 +16,7 @@
                 @dragstart="onDragStart(task, 'todo')"
               >
                 <div>
-                  {{ index + 1 }}. <strong>{{ task.title }}</strong
-                  >: {{ task.description }}
+                  {{ index + 1 }}. <strong>{{ task.title }}</strong>: {{ task.description }}
                 </div>
                 <div>
                   <button
@@ -54,8 +53,7 @@
                 @dragstart="onDragStart(task, 'progress')"
               >
                 <div>
-                  {{ index + 1 }}. <strong>{{ task.title }}</strong
-                  >: {{ task.description }}
+                  {{ index + 1 }}. <strong>{{ task.title }}</strong>: {{ task.description }}
                 </div>
                 <div>
                   <button
@@ -90,8 +88,7 @@
                 @dragstart="onDragStart(task, 'done')"
               >
                 <div>
-                  {{ index + 1 }}. <strong>{{ task.title }}</strong
-                  >: {{ task.description }}
+                  {{ index + 1 }}. <strong>{{ task.title }}</strong>: {{ task.description }}
                 </div>
                 <div>
                   <button
@@ -124,23 +121,36 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from "vue";
+<script lang="ts" setup>
+import { ref, defineProps } from "vue";
 import EditModal from "./EditModal.vue";
 
-const props = defineProps({
-  tasks: Object,
-});
+interface Task {
+  title: string;
+  description: string;
+  status: string;
+  index?: number;
+}
 
-const editTask = ref(null);
-const editCategory = ref("");
-let draggedTask = null;
+interface Tasks {
+  todo: Task[];
+  progress: Task[];
+  done: Task[];
+}
 
-const removeTask = (category, index) => {
+const props = defineProps<{
+  tasks: Tasks;
+}>();
+
+const editTask = ref<Task | null>(null);
+const editCategory = ref<string>("");
+let draggedTask: { task: Task; category: string } | null = null;
+
+const removeTask = (category: string, index: number) => {
   props.tasks[category].splice(index, 1);
 };
 
-const openEditModal = (category, index, task) => {
+const openEditModal = (category: string, index: number, task: Task) => {
   editCategory.value = category;
   editTask.value = { ...task, index };
 };
@@ -150,10 +160,10 @@ const closeEditModal = () => {
   editCategory.value = "";
 };
 
-const updateTask = (updatedTask) => {
+const updateTask = (updatedTask: Task) => {
   const currentCategory = editCategory.value;
   const newCategory = updatedTask.status;
-  const index = editTask.value.index;
+  const index = (editTask.value as Task & { index: number }).index;
 
   if (currentCategory !== newCategory) {
     props.tasks[currentCategory].splice(index, 1);
@@ -165,13 +175,16 @@ const updateTask = (updatedTask) => {
   closeEditModal();
 };
 
-const onDragStart = (task, category) => {
+const onDragStart = (task: Task, category: string) => {
   draggedTask = { task, category };
 };
 
-const onDrop = (category) => {
+const onDrop = (category: string) => {
   if (draggedTask) {
     const { task, category: sourceCategory } = draggedTask;
+
+    task.status = category;
+
     props.tasks[sourceCategory] = props.tasks[sourceCategory].filter(
       (t) => t !== task
     );
@@ -197,7 +210,7 @@ const onDrop = (category) => {
 .card {
   margin-bottom: 20px;
   flex: 1;
-  min-width: 300px; 
+  min-width: 300px;
 }
 
 .card-header {

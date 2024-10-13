@@ -48,15 +48,13 @@
                 class="form-select"
                 id="statusSelect"
                 v-model="status"
-                required
               >
                 <option value="todo">To-Do</option>
                 <option value="progress">In Progress</option>
                 <option value="done">Done</option>
               </select>
-              <span v-if="errors.status" class="text-danger">{{ errors.status }}</span>
             </div>
-            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
           </form>
         </div>
       </div>
@@ -64,62 +62,70 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, watch } from "vue";
+import { defineProps, defineEmits } from "vue";
 
-const props = defineProps({
-  task: Object,
-  category: String
-});
+const props = defineProps<{
+  task: {
+    title: string;
+    description: string;
+    status: string;
+  } | null;
+  category: string;
+}>();
+
+const emit = defineEmits<{
+  (e: "close"): void;
+  (e: "update-task", updatedTask: { title: string; description: string; status: string }): void;
+}>();
+
+const title = ref("");
+const description = ref("");
+const status = ref("");
 
 const errors = ref({
   title: "",
   description: "",
-  status: ""
 });
-
-const title = ref(props.task.title);
-const description = ref(props.task.description);
-const status = ref(props.task.status);
-
-const emit = defineEmits(["update-task", "close"]);
 
 watch(
   () => props.task,
   (newTask) => {
-    title.value = newTask.title;
-    description.value = newTask.description;
-    status.value = newTask.status;
-  }
+    if (newTask) {
+      title.value = newTask.title;
+      description.value = newTask.description;
+      status.value = newTask.status;
+    }
+  },
+  { immediate: true }
 );
 
-const validateForm = () => {
-  errors.value.title = title.value.length >= 3 ? "" : "Title must be at least 3 characters.";
-  errors.value.description = description.value.length >= 10 ? "" : "Description must be at least 10 characters.";
-  errors.value.status = status.value ? "" : "Status is required.";
-
-  return !errors.value.title && !errors.value.description && !errors.value.status;
-};
-
 const submitForm = () => {
-  if (validateForm()) {
-    const updatedTask = {
-      ...props.task,
-      title: title.value,
-      description: description.value,
-      status: status.value
-    };
+  errors.value.title = title.value ? "" : "Title is required";
+  errors.value.description = description.value ? "" : "Description is required";
 
-    emit("update-task", updatedTask);
-    emit("close");
+  if (!errors.value.title && !errors.value.description) {
+    emit("update-task", { title: title.value, description: description.value, status: status.value });
   }
 };
 </script>
 
 <style scoped>
-.modal {
-  display: block;
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
+
+.modal-body {
+  padding: 20px;
+}
+
+.form-label {
+  margin-bottom: 5px;
+}
+
 .text-danger {
   font-size: 0.9rem;
 }
